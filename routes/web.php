@@ -56,7 +56,7 @@ Route::controller(OrderController::class)->group(function(){
     });
 
 
-   //////////////////////RESTAURANT MANAGEMENT//////////////////////////////////////
+///////////////////////RESTAURANT MANAGEMENT//////////////////////////////////////
     Route::controller(RestaurantController::class)->group(function(){
     Route::get('/restaurant_list','restaurant_list')->name('restaurant_list'); 
     });
@@ -65,17 +65,19 @@ Route::controller(OrderController::class)->group(function(){
         Route::get('/cuisine', [ZoneController::class, 'cuisine']);
         
         
-  /////////////////////////FOOD MANAGEMENT/////////////////////////////////
+//////////////////////////FOOD MANAGEMENT/////////////////////////////////
         Route::controller(CategoryController::class)->group(function(){
-        Route::get('/category','category')->name('category');
+        Route::get('/category_list','category_list')->name('category_list');
+        Route::post('/category/add','category_add')->name('category.add');
+        Route::get('/category/category_delete/{id}','category_delete');
+        Route::put('category/{id}','update_category')->name('update.category');
         Route::get('/sub_category','sub_category')->name('sub_category'); 
         Route::get('/addons_list','addons_list')->name('addons_list');
         Route::get('/food_list','food_list')->name('food_list');
         Route::get('/review','review')->name('review');
-        Route::get('add_category','add_category');
         });
     
-      ////////////////////////PROMOTION MANAGEMENT/////////////////
+/////////////////////////PROMOTION MANAGEMENT//////////////////////////
       Route::controller(CampaignController::class)->group(function(){
       Route::get('/campaign_list','basic_campaign')->name('campaign_list');
       Route::get('/food_campaign','food_campaign')->name('food_campaign');   
@@ -87,10 +89,10 @@ Route::controller(OrderController::class)->group(function(){
    Route::get('/benner','benners');
    Route::post('/banner/store','add_banner')->name('banner.store');
    Route::get('/banner/banner_delete/{id}','banner_delete');
-    Route::put('banner/{id}','update_banner')->name('update.banner');
+   Route::put('banner/{id}','update_banner')->name('update.banner');
    });
    
-   /////////////////////////COUPON///////////////////////////////////////
+//////////////////////////COUPON///////////////////////////////////////
      Route::controller(CouponController::class)->group(function(){
          Route::get('/coupon','coupon')->name('coupon'); 
          Route::get('/coupon/delete_coupon/{id}','delete_coupon');

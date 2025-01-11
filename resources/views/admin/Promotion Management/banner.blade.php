@@ -51,16 +51,8 @@
                                             </a>
                                     </td>
                                 </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+                                
+                                
 <!-- --------------------------------------ADD BENNER SECTION------------------------------------------------- -->
 <div class="modal fade" id="addBannerModal" tabindex="-1" aria-labelledby="addBannerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -141,6 +133,16 @@
 
 <!------------------------------------------------END BANNER SECTION----------------------------------------------->
 
+
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @include('admin.footer')
 

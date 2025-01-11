@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\URL;
 class ProfileController extends Controller
 {
     
-    public function profile(Request $request){
+///////////////////////REGISTER/////////////////////////
+    public function register(Request $request){
         $validate = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'phone' => 'required|digits:10',
@@ -24,33 +25,43 @@ class ProfileController extends Controller
             'profile_image'=>'required'
         ]);
         
-        if ($validate->fails()) {
+         if ($validate->fails()) {
             $errors = implode(", ", $validate->errors()->all());
             return response()->json([
-                'status' => 400,
+                'status' => false,
                 'message' => 'Failed: ' . $errors
             ], 200);
         }
 
-   $uploadImage = function ($base64Image) {
+          $data = DB::table('user_profile')
+        ->where('phone', $request->input('phone'))
+        ->first();
+    
+        if ($data) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Phone number is already registered.',
+        ], 200);
+    }
+    
+        $uploadImage = function ($base64Image) {
         $imageName = Str::random(20) . '.png';
-        $imagePath = public_path('uploads') . '/' . $imageName;
-
+        $imagePath = public_path('uploads') . '/' . $imageName; 
         if (file_put_contents($imagePath, base64_decode($base64Image))) {
             return URL::to('/') . '/uploads/' . $imageName;
         }
         return null;
-    };
+     };
 
-    $profile_image = $uploadImage($request->input('profile_image'));
-    if (!$profile_image) {
+        $profile_image = $uploadImage($request->input('profile_image'));
+        if (!$profile_image) {
         return response()->json([
             'success' => false,
             'message' => 'Failed to save one or more images.',
         ], 500);
     }
 
-             $insertdata=DB::table('user_profile')->insertGetId([
+             $user=DB::table('user_profile')->insertGetId([
              'name'=>$request->input('name'),
              'phone'=>$request->input('phone'),
              'email'=>$request->input('email'),
@@ -60,8 +71,10 @@ class ProfileController extends Controller
              'profile_image'=>$profile_image,
              'status'=>1
         ]); 
+        
+            $insertedData = DB::table('user_profile')->where('id', $user)->first();
              return response()->json([
-            'data'=>$insertdata,
+            'data'=>$insertedData,
             'status'=>'true',
             'message'=>'successfully',
             ],200);
@@ -69,7 +82,7 @@ class ProfileController extends Controller
 
 
 
-  //////////////////LOGIN////////////////////////// 
+/////////////////////////LOGIN///////////////////////////// 
 public function login(Request $request){ 
     $validate = Validator::make($request->only('phone'), [
         'phone' => 'required|digits:10',
@@ -92,17 +105,14 @@ public function login(Request $request){
                  ]);
          
         }
-        
-            //////ACTIVE AND DEACTIVE//////
+//////////////////ACTIVE AND DEACTIVE//////////////////////
           if ($user->status != 1) {
-            return response()->json([
+                return response()->json([
                 'status' => 2,
                 'success' => true,
                 'message' => 'User is not authorized to log in',
-            ], 200);
-        }
-        
-        else{
+              ], 200);
+            }else{
                   return response()->json([
                   'user_id'=>$user->id, 
                   'success' => true,
@@ -112,7 +122,7 @@ public function login(Request $request){
           }  
  
 
-         /////////////////VEG MODE////////////////////
+///////////////////////VEG MODE////////////////////////////
          public function update_veg_mode(Request $request){
             $validate=Validator::make($request->all(),[
                   'id'=>'required',
@@ -124,8 +134,8 @@ public function login(Request $request){
                      'success'=>false,
                        'message' => 'Failed: ' . implode(', ', $validate->errors()->all()) 
                ],200);
-                }   
-                $update_veg_mode=DB::table('user_profile')
+            }   
+                    $update_veg_mode=DB::table('user_profile')
                    ->where('id', $request->input('id')) 
                    ->update([
                    'veg_mode' => $request->input('veg_mode'), 
@@ -146,43 +156,72 @@ public function login(Request $request){
    
    
    
-      ////// ////////UPDATE  PROFILE///////////////////
-       public function update_profile(Request $request){
-        $validate=Validator::make($request->all(),
-           [
-                'id'=>'required',  
-           ]);
-       
-       if($validate->fails()){
-           return response()->json([
-                 'status'=>400,
-                   'message' => 'Failed: ' . implode(', ', $validate->errors()->all())
-           ],200);
-       }
-   
-                $update_profile=DB::table('user_profile')
-               ->where('id', $request->input('id')) 
-               ->update([ 
-                'name'=>$request->input('name'),
-                'phone'=>$request->input('phone'),
-                'email'=>$request->input('email'),
-                'dob'=>$request->input('dob'),
-                'anniversary'=>$request->input('anniversary'),
-                'gender'=>$request->input('gender')
-               ]);
+ 
+///////////////////////UPDATE  PROFILE////////////////////////
+    public function update_profile(Request $request)
+    { 
+    $validator = Validator::make($request->all(), [
+        'id' => 'required|exists:user_profile,id', // Ensure ID exists in the table
+        'name' => 'nullable|string|max:255',
+        'phone' => 'nullable|string|max:15',
+        'email' => 'nullable|email|max:255',
+        'dob' => 'nullable|date',
+        'anniversary' => 'nullable|date',
+        'gender' => 'nullable|string|in:male,female,other',
+    ]);
 
-       if($update_profile){
-               return response()->json([
-               'status' => 200,
-               'message' => 'updated successfuly', 
-              ], 200);   
-       } else {
-                return response()->json([
-               'status' =>400,
-               'message' => 'id not found',
-           ], 200);
-         }     
-       } 
-     }
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Validation Failed: ' . implode(', ', $validator->errors()->all()),
+        ], 400);
+    }
+ 
+    $data = $request->only(['name', 'phone', 'email', 'dob', 'anniversary', 'gender']);
+    $data = array_filter($data, function ($value) {
+        return $value !== null;
+    });
+
+   
+          $updated = DB::table('user_profile')
+        ->where('id', $request->input('id'))
+        ->update($data);
+
+    if ($updated) {
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile updated successfully',
+        ], 200);
+    }else{
+        return response()->json([
+            'status' => false,
+            'message' => 'No changes were made or ID not found',
+        ], 200);
+    }
+  }
+  
+  
+////////////////////USER PROFILE////////////////////////
+  public function user_profile($id){ 
+         $users = DB::table('user_profile')
+        ->select('*') 
+        ->where('id', $id) 
+        ->first(); 
+  
+        if (empty($users)) {
+            return response()->json([
+                'status' => false,  
+                'error' => 'user not found'
+            ], 200);
+        }else{
+            return response()->json([
+            'data'=>$users, 
+            'status'=> true,
+            'message' => 'success .',
+        ], 200);
+        }
+    }
+
+}
     
 

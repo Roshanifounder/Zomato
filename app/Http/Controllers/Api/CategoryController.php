@@ -16,9 +16,11 @@ class CategoryController extends Controller
     
     /////////////////CATEGORY////////////////////////
     public function category_list(Request $request){
-        $getCategory=DB::table('category')->get();
+        $getCategory=DB::table('category')
+        ->select('*')
+        ->get();
         
-        if(!empty($getCategory)){
+        if(empty($getCategory)){
             return response()->json([
                 'success'=>false,
                 'message'=>'category data list not found'
@@ -27,7 +29,7 @@ class CategoryController extends Controller
             return response()->json([
                 'success'=>false,
                 'message'=>'category data list',
-                'category_list'=>$getcategory
+                'category_list'=>$getCategory
                 ],200);
         }
     }

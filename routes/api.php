@@ -11,8 +11,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('slider',[SliderController::class,'slider']);
-Route::post('profile',[ProfileController::class,'profile']);
+Route::get('/sliders', [SliderController::class, 'getSliders']); 
+Route::post('/review', [SliderController::class, 'review']); 
+Route::post('/add_to_cart', [SliderController::class, 'add_to_cart']); 
+
+Route::post('register',[ProfileController::class,'register']);
+Route::get('user_profile/{id}',[ProfileController::class,'user_profile']); 
 Route::post('update_veg_mode',[ProfileController::class,'update_veg_mode']);
 Route::post('Login',[ProfileController::class,'login']);
 Route::post('update_profile',[ProfileController::class,'update_profile']);

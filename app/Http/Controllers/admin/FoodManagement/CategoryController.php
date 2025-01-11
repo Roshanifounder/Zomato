@@ -5,30 +5,87 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use  Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
-    public function category(){
-        $user_id=session::get('id');
-        $category=DB::table('category')->get();
-        if(!empty($user_id)){
-            return view('/admin.Food Management.category',['categorys'=>$category]);
-        }else{
-            return redirect('/login');
+     public function category_list(){
+         $user_id=session::get('id');
+         $categorydata=DB::table('category')->get();
+         if(!empty($user_id)){
+             return view('/admin.Food Management.category_list',['categorys'=>$categorydata]);
+         }else{
+             return redirect('/login');
         }
+     }
+     
+///////////////////////////ADD CATEGORY/////////////////////////////
+public function category_add(Request $request){
+      $validate = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'images' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048', // Ensure valid file type and size
+    ]);
+
+    if ($validate->fails()) {
+        return back()->withErrors($validate)->withInput();
     }
 
-//////////////ADD CATEGORY/////////////////
-
-       public function add_category(){
-           $user_id=session::get('id');
-           if(!empty($user_id)){
-               return view('admin.Food Management.category');
-           }else{
-               return redirect('/login');
-           }
-       }
+   
+    if ($request->hasFile('images')) {
+        $imageFile = $request->file('images');
+        $publicPath = 'category';
+        $imageFileName = time() . '_' . $imageFile->getClientOriginalName();
+        $imageFile->move(public_path($publicPath), $imageFileName); 
+        $images = url($publicPath . '/' . $imageFileName); 
        
+        DB::table('category')->insert([
+            'name' => $request->input('name'), 
+            'images' => $images,
+        ]); 
+        return redirect()->back()->with('success', 'category added successfully!');
+       }else {
+        return redirect()->back()->with('error', 'Image upload failed.');
+     }
+ }
+ 
+ 
+
+//////////////////////UPDATE CATEGORY///////////////////////////////
+public function update_category(Request $request, $id)
+       { 
+         $validated = $request->validate([
+        'name' => 'required',
+        'images'=>'required',
+     ]);
+ 
+  if ($request->hasFile('images')) {
+        $imageFile = $request->file('images');
+        $publicPath = 'category';
+        $imageFileName = time() . '_' . $imageFile->getClientOriginalName();
+        $imageFile->move(public_path($publicPath), $imageFileName); 
+        $images = url($publicPath . '/' . $imageFileName);  
+   }
+    $data=DB::table('category') 
+        ->where('category.id', $id)
+        ->update([
+          'name'=>$request->input('name'),
+          'images'=>$images
+        ]); 
+     return redirect()->back()->with('success', 'updated successfully.');
+    }  
+ 
+ 
+ 
+/////////////////////CATEGORY DELETE////////////////////////////////
+public function category_delete(String $id){
+    $data=DB::table('category')
+    ->where('id',$id)
+    ->delete();
+    return redirect('/category_list')->with('success', 'category deleted successfully!');
+}
+  
+    
+//////////////////////////SUB CATEGORY/////////////////////////////
        public function sub_category(){
         $user_id=session::get('id');
         if(!empty($user_id)){
@@ -39,6 +96,7 @@ class CategoryController extends Controller
     }
 
     
+////////////////////ADDONS LIST///////////////////////////////////
         public function addons_list(){
         $user_id=session::get('id');
         if(!empty($user_id)){
@@ -48,7 +106,7 @@ class CategoryController extends Controller
         }
     }
 
-    ////////Foods ////////
+//////////////////////////FOODS/////////////////////////////////
     public function food_list(){
         $user_id=session::get('id');
         if(!empty($user_id)){
@@ -59,6 +117,7 @@ class CategoryController extends Controller
     }
 
 
+///////////////////////REVIEW//////////////////////////////////
     public  function review(){
         $user_id=session::get('id');
         if(!empty($user_id)){
