@@ -14,6 +14,8 @@ Route::get('/user', function (Request $request) {
 Route::get('/sliders', [SliderController::class, 'getSliders']); 
 Route::post('/review', [SliderController::class, 'review']); 
 Route::post('/add_to_cart', [SliderController::class, 'add_to_cart']); 
+Route::post('/delete_cart',[SliderController::class,'delete_cart']);
+Route::get('/view_cart',[SliderController::class,'view_cart']);
 
 Route::post('register',[ProfileController::class,'register']);
 Route::get('user_profile/{id}',[ProfileController::class,'user_profile']); 
