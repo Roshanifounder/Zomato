@@ -88,14 +88,24 @@ public function category_delete(String $id){
 //////////////////////////SUB CATEGORY/////////////////////////////
        public function sub_category(){
         $user_id=session::get('id');
+        $sub_category=DB::table('sub_category')->get();
         if(!empty($user_id)){
-            return view('/admin.Food Management.sub_category');
+            return view('/admin.Food Management.sub_category',['subcategory'=>$sub_category]);
         }else{
             return redirect('/login');
         }
     }
 
     
+////////////////////////DELETE SUB CATEGORY///////////////////////
+public function sub_category_delete(String $id){
+    $data=DB::table('sub_category')
+    ->where('id',$id)
+    ->delete();
+    return redirect('/sub_category')->with('success','sub category deleted successfully');
+}
+
+
 ////////////////////ADDONS LIST///////////////////////////////////
         public function addons_list(){
         $user_id=session::get('id');
@@ -105,6 +115,7 @@ public function category_delete(String $id){
             return redirect('/login');
         }
     }
+
 
 //////////////////////////FOODS/////////////////////////////////
     public function food_list(){

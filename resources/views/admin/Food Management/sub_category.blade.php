@@ -3,7 +3,7 @@
         <div class="container">
           <div class="page-inner">
             <div class="page-header">
-              <h3 class="fw-bold mb-3">Category</h3>
+              <h3 class="fw-bold mb-3">Sub Category</h3>
               <ul class="breadcrumbs mb-3">
                 <li class="nav-home">
                   <a href="#">
@@ -52,24 +52,23 @@
                           </tr>
                         </thead>
                         <tbody>
+                            @foreach($subcategory as $key=>$sub_category)
                           <tr>
+                            <td>{{$key+1}}</td>
+                            <td>{{$sub_category->name}}</td>
+                            <td>{{$sub_category->id}}</td>
+                            <td>{{$sub_category->categoryID}}</td> 
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td> 
-                            <td></td>
-                            <td></td>
+                            <td>{{$sub_category->status}}</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title=""class="btn btn-warning"data-original-title="Edit Task"style="margin-right:10px;">
-                                  <i class="fa fa-edit"></i>
-                                </button>
-                                <button type="button"  data-bs-toggle="tooltip" title="" class="btn btn-danger"data-original-title="Remove"style="border: 5px solid red;">
-                                  <i class="fa fa-trash"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr> 
+                                 <a href=""class="btn btn-warning"><i class="fa fa-edit"></i></a>
+                                 <a href="{{ url('/sub_category/sub_category_delete/'.$sub_category->id )}}" class="btn btn-danger" onclick="return confirmDeleteWithSweetAlert('{{ url('/sub_category/sub_category_delete/'.$sub_category->id )}}');" style="margin-left:10px;">
+                                      <i class="fa fa-trash"></i></a> 
+                               </div>
+                             </td>
+                           </tr> 
+                          @endforeach
                         </tbody>
                       </table>
                     </div>
@@ -81,6 +80,30 @@
         </div>
 
         @include('admin.footer')
+        
+<!-------------------------------DELETE POPUP---------------------------->
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+<script> 
+    function confirmDeleteWithSweetAlert(deleteUrl) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = deleteUrl;
+            }
+        });
+        return false;
+    }
+</script>
+
+<!----------------------------END SECTION-------------------------------------->
+  
     <script>
       $(document).ready(function () {
         $("#basic-datatables").DataTable({});

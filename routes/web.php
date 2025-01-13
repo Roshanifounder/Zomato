@@ -72,6 +72,7 @@ Route::controller(OrderController::class)->group(function(){
         Route::get('/category/category_delete/{id}','category_delete');
         Route::put('category/{id}','update_category')->name('update.category');
         Route::get('/sub_category','sub_category')->name('sub_category'); 
+         Route::get('/sub_category/sub_category_delete/{id}','sub_category_delete');
         Route::get('/addons_list','addons_list')->name('addons_list');
         Route::get('/food_list','food_list')->name('food_list');
         Route::get('/review','review')->name('review');
