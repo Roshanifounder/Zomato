@@ -81,7 +81,12 @@
                         <label for="images" class="form-label">Category Image</label>
                         <input type="file" class="form-control" id="type" name="images" required>
                     </div>
-                     
+                            
+                            <div class="mb-3">
+                        <label for="delivery_time" class="form-label">Delivery Time</label>
+                        <input type="text" class="form-control" id="delivery_time" name="delivery_time" required>
+                    </div>
+              
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

@@ -111,6 +111,7 @@ public function add_to_cart(Request $request){
             }
       }
       
+      
 ///////////////////////////REMOVE CART////////////////////////////  
 public function delete_cart(Request $request) { 
     $validate = Validator::make($request->only('user_id'), [
@@ -154,19 +155,23 @@ public function delete_cart(Request $request) {
 }
 
 
-///////////////////////CART ITEM VIEW//////////////////////////////
-public function cart_view(Request $request,$id){
-    $cart_view=DB::table('add_cart')->where('id',$id)->first();
-    if($cart_view){
+///////////////////////CART ITEM VIEW////////////////////////////// 
+public function view_cart(Request $request, $user_id)
+{
+    $cart_view = DB::table('add_cart')->where('user_id', $user_id)->first();
+
+    if (!empty($cart_view)) {
         return response()->json([
-             'status'=>true,
-             'message'=>'success',
-            ],200);
-    }else{
+            'status' => true,
+            'message' => 'Success',
+            'data' => $cart_view,
+        ], 200);
+    } else {
         return response()->json([
-            'status'=>false,
-            'message'=>'failes .',
-            ],200);
-         }
-     } 
+            'status' => false,
+            'message' => 'No cart data found.',
+        ], 200);
+    }
+}
+
   }

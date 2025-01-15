@@ -30,10 +30,9 @@
                   <div class="card-header">
                     <div class="d-flex align-items-center">
                       <!-- <h4 class="card-title">Add Row</h4>   -->
-                      <button class="btn btn-primary btn-round ms-auto"data-bs-toggle="modal"data-bs-target="#addRowModal">
-                        <i class="fa fa-plus"></i>
-                        Add SubCategory
-                      </button>
+                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBannerModal"style="postion:relative;float:right;">
+                        Add Sub Category
+                    </button>
                     </div>
                   </div>
                   <div class="card-body"> 
@@ -45,8 +44,7 @@
                             <th>SL</th>
                             <th>Sub Category</th>
                             <th>ID</th>
-                            <th>Main Category</th> 
-                            <th>Priority</th>
+                            <th>image</th>  
                             <th>Status</th>
                             <th>Action</th>
                           </tr>
@@ -57,8 +55,7 @@
                             <td>{{$key+1}}</td>
                             <td>{{$sub_category->name}}</td>
                             <td>{{$sub_category->id}}</td>
-                            <td>{{$sub_category->categoryID}}</td> 
-                            <td></td>
+                            <td><img src="{{$sub_category->image}}"height="90px"width="100px"></td>  
                             <td>{{$sub_category->status}}</td>
                             <td>
                               <div class="form-button-action">
@@ -68,6 +65,43 @@
                                </div>
                              </td>
                            </tr> 
+                           
+                           
+                           <!-----------------------------------------ADD Sub CATEGORY SECTION---------------------------------------------------------->
+<div class="modal fade" id="addBannerModal" tabindex="-1" aria-labelledby="addBannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('sub_category.add') }}"enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBannerModalLabel">Add Sub Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Sub Category Image</label>
+                        <input type="file" class="form-control" id="type" name="image" required>
+                    </div>
+                            
+                            <div class="mb-3">
+                        <label for="categoryID" class="form-label">Category ID</label>
+                        <input type="text" class="form-control" id="categoryID" name="categoryID" required>
+                    </div>
+              
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>  
+            </form>
+        </div>
+    </div>
+</div> 
+<!----------------------------------------------END ADD Sub CATEGORY SECTION---------------------------------------------->
                           @endforeach
                         </tbody>
                       </table>

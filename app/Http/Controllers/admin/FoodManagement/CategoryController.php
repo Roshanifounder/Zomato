@@ -23,7 +23,8 @@ class CategoryController extends Controller
 public function category_add(Request $request){
       $validate = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
-        'images' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048', // Ensure valid file type and size
+        'images' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',  
+        'delivery_time'=>'required'
     ]);
 
     if ($validate->fails()) {
@@ -41,6 +42,7 @@ public function category_add(Request $request){
         DB::table('category')->insert([
             'name' => $request->input('name'), 
             'images' => $images,
+            'delivery_time'=>$request->input('delivery_time')
         ]); 
         return redirect()->back()->with('success', 'category added successfully!');
        }else {
@@ -96,6 +98,38 @@ public function category_delete(String $id){
         }
     }
 
+
+
+///////////////////////SUB CATEGORY ADD////////////////////////////////
+public function sub_category_add(Request $request){
+      $validate = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'image' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',  
+        'categoryID'=>'required'
+    ]);
+
+    if ($validate->fails()) {
+        return back()->withErrors($validate)->withInput();
+    }
+
+   
+    if ($request->hasFile('image')) {
+        $imageFile = $request->file('image');
+        $publicPath = 'subcategory';
+        $imageFileName = time() . '_' . $imageFile->getClientOriginalName();
+        $imageFile->move(public_path($publicPath), $imageFileName); 
+        $images = url($publicPath . '/' . $imageFileName); 
+       
+        DB::table('sub_category')->insert([
+            'name' => $request->input('name'), 
+            'image' => $images,
+            'categoryID'=>$request->input('categoryID')
+        ]); 
+        return redirect()->back()->with('success', 'category added successfully!');
+       }else {
+        return redirect()->back()->with('error', 'Image upload failed.');
+     }
+ }
     
 ////////////////////////DELETE SUB CATEGORY///////////////////////
 public function sub_category_delete(String $id){

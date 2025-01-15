@@ -13,8 +13,7 @@ use Illuminate\Support\Facades\URL;
 
 class AddressController extends Controller
 {
-    
-    //////////////////ADD ADDRESS////////////////////
+/////////////////////ADD ADDRESS////////////////////////////////
     public function add_address(Request $request){
            $validate = Validator::make($request->all(), [
             'street_name' => 'required',
@@ -58,7 +57,7 @@ class AddressController extends Controller
     
     
     
-    //////////////////ADDRESS VIEW//////////////////
+////////////////////////ADDRESS VIEW/////////////////////////////////////
     public function address_view($id){ 
        $userId = $id; 
     if (!empty($userId)) {
@@ -87,35 +86,45 @@ class AddressController extends Controller
     }
     
     
-///////////////////////////ADDRESS DELETE/////////////////////////
-     public function address_delete(Request $request){
-          $validateUser = Validator::make($request->all(), [
-          'userid' => 'required',  
+//////////////////////////////////ADDRESS DELETE/////////////////////////////// 
+    public function address_delete(Request $request) { 
+    $validate = Validator::make($request->only('user_id'), [
+        'user_id' => 'required',
     ]);
 
-    if ($validateUser->fails()) {
+    if ($validate->fails()) {
+        $errors = implode(", ", $validate->errors()->all());
         return response()->json([
             'status' => false,
-            'message' => 'Validation Failed',
-            'errors' => $validateUser->errors()
-        ], 400);  
+            'message' => 'Failed: ' . $errors,
+        ], 200);
     }
-    $user_id=$request->input('user_id');
-    $address_delete=DB::table('address')
-    ->where('id',$user_id)
-    ->delete(); 
-     
-    if(!empty($address_delete)){
+ 
+    $existingAddress = DB::table('address')
+        ->where('user_id', $request->input('user_id'))
+        ->count();
+
+    if ($existingAddress == 0) {
         return response()->json([
-            'success'=>false,
-            'message'=>'Address Not Found'
-            ],200);
-          
-    }else{
+            'status' => false,
+            'message' => 'No address found for this user.',
+        ], 200);
+    }
+ 
+    $query = DB::table('address')
+        ->where('user_id', $request->input('user_id'))
+        ->delete();
+
+    if ($query) {
         return response()->json([
-            'success'=>true,
-            'message'=>'Address Deleted Successful', 
-            ],200);
-       }
-     }
+            'status' => true,
+            'message' => 'Address deleted successfully.',
+        ], 200);
+    } else {
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to delete Address. Please try again.',
+        ], 200);
+    }
+}
   }

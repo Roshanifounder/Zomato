@@ -143,139 +143,18 @@ public function login(Request $request)
    
    
  
-///////////////////////UPDATE  PROFILE////////////////////////
-//     public function update_profile(Request $request)
-//     { 
-//     $validator = Validator::make($request->all(), [
-//         'id' => 'required|exists:user_profile,id',  
-//         'name' => 'nullable|string|max:255',
-//         'phone' => 'nullable|string|max:15',
-//         'email' => 'nullable|email|max:255',
-//         'dob' => 'nullable|date',
-//         'anniversary' => 'nullable|date',
-//         'gender' => 'nullable|string|in:male,female,other',
-//         'profile_images'=>'required'
-        
-//     ]);
-
-//     if ($validator->fails()) {
-//         return response()->json([
-//             'status' => false,
-//             'message' => 'Validation Failed: ' . implode(', ', $validator->errors()->all()),
-//         ], 400);
-//     }
- 
-//     $data = $request->only(['name', 'phone', 'email', 'dob', 'anniversary', 'gender']);
-//     $data = array_filter($data, function ($value) {
-//         return $value !== null;
-//     });
-
-//         $uploadImage = function ($base64Image) {
-//         $imageName = Str::random(20) . '.png';
-//         $imagePath = public_path('uploads') . '/' . $imageName; 
-//         if (file_put_contents($imagePath, base64_decode($base64Image))) {
-//             return URL::to('/') . '/uploads/' . $imageName;
-//         }
-//         return null;
-//      };
-
-//         $profile_image = $uploadImage($request->input('profile_image'));
-//         if (!$profile_image) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Failed to save one or more images.',
-//         ], 500);
-//     }
- 
-//           $updated = DB::table('user_profile')
-//         ->where('id', $request->input('id'))
-//         ->update($data);
-
-//     if ($updated) {
-//         return response()->json([
-//             'status' => true,
-//             'message' => 'Profile updated successfully',
-//         ], 200);
-//     }else{
-//         return response()->json([
-//             'status' => false,
-//             'message' => 'No changes were made or ID not found',
-//         ], 200);
-//     }
-//   }
- 
-//   public function update_profile(Request $request)
-//     { 
-//     $validator = Validator::make($request->all(), [
-//         'id' => 'required|exists:user_profile,id', 
-//         'name' => 'nullable|string|max:255',
-//         'phone' => 'nullable|string|max:15',
-//         'email' => 'nullable|email|max:255',
-//         'dob' => 'nullable|date',
-//         'anniversary' => 'nullable|date',
-//         'gender' => 'nullable|string|in:male,female,other',
-//         'profile_images'=>'required'
-//     ]);
-
-//     if ($validator->fails()) {
-//         return response()->json([
-//             'status' => false,
-//             'message' => 'Validation Failed: ' . implode(', ', $validator->errors()->all()),
-//         ], 400);
-//     }
- 
-//     $data = $request->only(['name', 'phone', 'email', 'dob', 'anniversary', 'gender']);
-//     $data = array_filter($data, function ($value) {
-//         return $value !== null;
-//     });
-
-
-//         $uploadImage = function ($base64Image) {
-//         $imageName = Str::random(20) . '.png';
-//         $imagePath = public_path('uploads') . '/' . $imageName; 
-//         if (file_put_contents($imagePath, base64_decode($base64Image))) {
-//             return URL::to('/') . '/uploads/' . $imageName;
-//         }
-//         return null;
-//      };
-
-//         $profile_image = $uploadImage($request->input('profile_image'));
-//         if (!$profile_image) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Failed to save one or more images.',
-//         ], 500);
-//     }
-   
-//           $updated = DB::table('user_profile')
-//         ->where('id', $request->input('id'))
-//         ->update($data);
-
-//     if ($updated) {
-//         return response()->json([
-//             'status' => true,
-//             'message' => 'Profile updated successfully',
-//         ], 200);
-//     }else{
-//         return response()->json([
-//             'status' => false,
-//             'message' => 'No changes were made or ID not found',
-//         ], 200);
-//      }
-//   }
-
-
+///////////////////////UPDATE  PROFILE////////////////////////   
  public function update_profile(Request $request)
-{ 
+{
     $validator = Validator::make($request->all(), [
-        'id' => 'required|exists:user_profile,id', 
+        'id' => 'required|exists:user_profile,id',
         'name' => 'nullable|string|max:255',
         'phone' => 'nullable|string|max:15',
         'email' => 'nullable|email|max:255',
-        'dob' => 'nullable|date',
+        'dob' => 'nullable',
         'anniversary' => 'nullable',
-        'gender' => 'nullable|string|in:male,female,other',
-        'profile_image' => 'nullable|string', 
+        'gender' => 'nullable',
+        'profile_image' => 'nullable',
     ]);
 
     if ($validator->fails()) {
@@ -286,37 +165,31 @@ public function login(Request $request)
     }
 
     $data = $request->only(['name', 'phone', 'email', 'dob', 'anniversary', 'gender']);
-    $data = array_filter($data, function ($value) {
-        return $value !== null;
-    });
+    $data = array_filter($data, fn($value) => !is_null($value));
 
-  
-    $uploadImage = function ($base64Image) {
-        $imageName = Str::random(20) . '.';
-        $imagePath = public_path('uploads') . '/' . $imageName; 
-        if (file_put_contents($imagePath, base64_decode($base64Image))) {
-            return URL::to('/') . '/uploads/' . $imageName;
-        }
-        return null;
-    };
-//   dd($uploadImage);
-   
-    if ($request->has('profile_image')) {
-        $profile_image = $uploadImage($request->input('profile_image'));
-        if ($profile_image) {
-            $data['profile_image'] = $profile_image;  
-        } else {
+    if ($request->filled('profile_image')) {
+        try {
+            $profile_image = $this->handleImageUpload($request->input('profile_image'), 'uploads');
+            if ($profile_image) {
+                $data['profile_image'] = $profile_image;
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Failed to save the profile image.',
+                ], 500);
+            }
+        } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Failed to save the image.',
+                'status' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
-// dd($uploadImage);
+
     $updated = DB::table('user_profile')
         ->where('id', $request->input('id'))
         ->update($data);
- 
+
     if ($updated) {
         return response()->json([
             'status' => true,
@@ -325,14 +198,48 @@ public function login(Request $request)
     } else {
         return response()->json([
             'status' => false,
-            'message' => 'No changes were made or ID not found',
+            'message' => 'No changes were made or the ID was not found.',
         ], 200);
     }
 }
 
+private function handleImageUpload($image, $directory, $existingImage = null)
+{
+    if (empty($image)) {
+        return $existingImage;
+    }
 
- 
-////////////////////USER PROFILE////////////////////////
+    if (filter_var($image, FILTER_VALIDATE_URL)) {
+        return $image;
+    }
+
+    $imageData = base64_decode($image);
+    if (!$imageData) {
+        throw new \Exception("Invalid base64 image data.");
+    }
+
+    $fileName = uniqid() . '.png';
+
+    $directoryPath = public_path($directory);
+    if (!file_exists($directoryPath)) {
+        mkdir($directoryPath, 0755, true);
+    }
+
+    $fullPath = $directoryPath . '/' . $fileName;
+    $saved = file_put_contents($fullPath, $imageData);
+
+    if (!$saved) {
+        throw new \Exception("Failed to upload image.");
+    }
+
+    $baseUrl = 'https://zomato.mobileappdemo.net';
+
+    return $baseUrl . '/' . $directory . '/' . $fileName;
+}
+
+
+
+////////////////////////////////USER PROFILE///////////////////////////////////////
   public function user_profile($id){ 
          $users = DB::table('user_profile')
         ->select('*') 
@@ -344,7 +251,7 @@ public function login(Request $request)
                 'status' => false,  
                 'error' => 'user not found'
             ], 200);
-        }else{
+        }else{ 
             return response()->json([
             'data'=>$users, 
             'status'=> true,

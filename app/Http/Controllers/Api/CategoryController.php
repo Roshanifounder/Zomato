@@ -14,55 +14,70 @@ use Illuminate\Support\Facades\URL;
 class CategoryController extends Controller
 {
     
-    /////////////////CATEGORY////////////////////////
-    public function category_list(Request $request){
-        $getCategory=DB::table('category')
+//////////////////////CATEGORY//////////////////////// 
+   public function category_list(Request $request)
+{
+    $categories = DB::table('category')
         ->select('*')
         ->get();
-        
-        if(empty($getCategory)){
-            return response()->json([
-                'success'=>false,
-                'message'=>'category data list not found'
-                ],200);
-        }else{
-            return response()->json([
-                'success'=>false,
-                'message'=>'category data list',
-                'category_list'=>$getCategory
-                ],200);
-        }
+
+    if ($categories->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Category data list not found',
+        ], 200);
     }
-    
-    
-    ///////////////////////SUB CATEGORY///////////////////
-    public function sub_category(Request $request){
-           $validate = Validator::make($request->all(), [
-            'CategoryID' => 'required',
+
+    $categoryList = $categories->map(function ($category) use ($request) { 
+        $subCategories = DB::table('sub_category')
+            ->where('categoryID', $category->id)  
+            ->select('*')
+            ->get();
+
+       
+        $subCategoryList = $subCategories->map(function ($subCategory) {
+            return [
+                
+                  'category_ID'=>$subCategory->categoryID,
+                'sub_cat_id' => $subCategory->id,
+                'name' => $subCategory->name,
+                'image' => $subCategory->image,
+                'status' => $subCategory->status,
+                'created_at' => $subCategory->created_at,
+                'updated_at' => $subCategory->updated_at,
+            ];
+        });
+
+        
+        $subCategoryList->prepend([
+            'category_ID' => $category->id,
+            'sub_cat_id' => 0,
+            'name' => $category->name,  
+            'image' => $category->images,  
+            'status' => $category->status,
+            'delivery_time' => $category->delivery_time,
+            'created_at' => $category->created_at,
+            'updated_at' => $category->updated_at,
         ]);
-        
-        if ($validate->fails()) {
-            $errors = implode(", ", $validate->errors()->all());
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed: ' . $errors
-            ], 200);
-        }
-        
-        $getSubCategory=DB::table('sub_category')
-        ->get();
-     
-        if(!empty($getSubCategory)){
-            return response()->json([
-               'success'=>false,
-               'message'=>'sub_category data not found'
-                ],200);
-        }else{  
-            return response()->json([
-                'success'=>true,
-                'message'=>'sub category list',
-                'sub_category'=>$getSubCategory
-                ],200); 
-        }
-    }
+
+       
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'images' => $category->images,
+            'status' => $category->status,
+            'delivery_time'=>$category->delivery_time,
+            'created_at' => $category->created_at,
+            'updated_at' => $category->updated_at,
+            'sub_category' => $subCategoryList,
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Category data list',
+        'category_list' => $categoryList,
+    ], 200);
+  }
+  
 }
